@@ -1,16 +1,18 @@
 let p5 = null;
-let EMITTER_OVERFLOW;
-let EMITTER_BOUNDS;
 
 let emitters = [];
 
 class Emitter {
   loc;
+  rot;
+  rotSpd;
   count;
   next;
 
   constructor(loc) {
     this.loc = loc;
+    this.rot = 2 * Math.PI * Math.random();
+    this.rotSpd = 0.05;
     this.count = 0;
     this.next = getSpawnTime();
   }
@@ -19,15 +21,18 @@ class Emitter {
     if (this.count++ > this.next) {
       this.count = 0;
       this.next = getSpawnTime();
-      return spawnParticle(this.loc);
+      this.rot += this.rotSpd;
+      return spawnParticle(this.loc, this.rot);
     }
   }
 
   draw(g) {
-    g.ellipseMode(p5.RADIUS);
-    g.stroke(200, 20, 50);
+    g.rectMode(p5.RADIUS);
+    g.stroke(20, 200, 50);
     g.noFill();
-    g.circle(this.loc.x, this.loc.y, 10);
+    g.translate(this.loc.x, this.loc.y);
+    g.rotateZ(this.rot);
+    g.rect(0, 0, 50, 20);
   }
 }
 
@@ -36,14 +41,6 @@ class Emitter {
  */
 export function initFactory(_p5, bounds) {
   p5 = _p5;
-
-  EMITTER_OVERFLOW = bounds.w / 2;
-  EMITTER_BOUNDS = {
-    x0: -EMITTER_OVERFLOW,
-    x1: bounds.w + EMITTER_OVERFLOW,
-    y0: -EMITTER_OVERFLOW,
-    y1: bounds.h + EMITTER_OVERFLOW
-  };
 }
 
 
@@ -69,8 +66,7 @@ export function drawEmitters(g) {
   emitters.forEach(e => e.draw(g));
 }
 
-export const SPAWN_DELAY = {min: 2, max: 10};
+export const SPAWN_DELAY = {min: 4, max: 8};
 export function getSpawnTime() {
   return Math.round(p5.random(SPAWN_DELAY.min, SPAWN_DELAY.max));
 }
-

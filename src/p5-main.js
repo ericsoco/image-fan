@@ -82,7 +82,7 @@ export default function (p5) {
     g2.translate(-BOUNDS.w/2, -BOUNDS.h/2);
 
     // updateEnv();
-    // updateObjects();
+    updateObjects();
     palette
       ? render()
       : renderLoading();
@@ -102,7 +102,7 @@ export default function (p5) {
    * Attach p5 mouseClicked() method to p5 instance
    */
   p5.mouseClicked = () => {
-    //
+    spawnEmitter(getMouseLoc(p5));
   }
 
   /*
@@ -118,6 +118,23 @@ export default function (p5) {
     );
   }
   */
+
+  function getMouseLoc(p5) {
+    return p5.createVector(p5.mouseX, p5.mouseY, 0);
+  }
+  
+  function updateObjects() {
+    updateEmitters(spawnParticle);
+    updateParticles();
+  }
+
+  function testPalette() {
+    const color = palette.getColorAtMouse(BOUNDS, p5.mouseX, p5.mouseY);
+    g3.rectMode(p5.CENTER);
+    g3.noStroke();
+    g3.fill(color);
+    g3.rect(p5.mouseX, p5.mouseY, 60, 60);
+  }
 
   function render() {
     p5.background(180, 170, 160);
@@ -136,14 +153,10 @@ export default function (p5) {
     g3._renderer.GL.clear(g3._renderer.GL.DEPTH_BUFFER_BIT);
     g2.clear();
 
-    const color = palette.getColorAtMouse(BOUNDS, p5.mouseX, p5.mouseY);
-    g3.rectMode(p5.CENTER);
-    g3.noStroke();
-    g3.fill(color);
-    g3.rect(p5.mouseX, p5.mouseY, 60, 60);
+    // testPalette();
     
-    // drawParticles(g3);
-    // drawEmitters(g2);
+    drawParticles(g3);
+    drawEmitters(g2);
     
     p5.image(g3, 0, 0);
     

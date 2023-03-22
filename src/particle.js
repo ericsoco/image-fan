@@ -1,10 +1,7 @@
+const PARTICLE_LIFESPAN = {min: 50, max: 80};
 const PARTICLE_SPEED = {min: 1, max: 3};
-const PARTICLE_ROT_SPEED = {min: 0.02, max: 0.08};
-const PARTICLE_TGT_VAR = {min: -0.05, max: 0.05};
-const PARTICLE_BOUNCE_ANG_VAR = {min: -0.1, max: 0.1};
-const PARTICLE_BOUNCE_VAR = {min: -0.25, max: 0.1};
-const PARTICLE_BOUNCE_SPEED = {min: 5, max: 20};
-const SQRT_THREE = Math.pow(3, 0.5);
+const PARTICLE_WIDTH = {min: 4, max: 6};
+const PARTICLE_HEIGHT = {min: 6, max: 16};
 
 let p5 = null;
 let particles = [];
@@ -12,61 +9,27 @@ let particles = [];
 class Particle {
   static particleCount = 0;
 
-  target;
+  age;
   loc;
-  rot;
   spd;
   size;
   id;
 
-  constructor(loc, target) {
-    this.target = target;
+  constructor(loc, rot) {
+    this.age = p5.random(PARTICLE_LIFESPAN.min, PARTICLE_LIFESPAN.max)
     this.loc = loc.copy();
-    this.rot = {
-      val: 0,
-      spd: p5.random(PARTICLE_ROT_SPEED.min, PARTICLE_ROT_SPEED.max)
+    this.spd = p5.createVector(0, p5.random(PARTICLE_SPEED.min, PARTICLE_SPEED.max))
+      .rotate(rot);
+    this.size = {
+      w: p5.random(PARTICLE_WIDTH.min, PARTICLE_WIDTH.max),
+      h: p5.random(PARTICLE_HEIGHT.min, PARTICLE_HEIGHT.max)
     };
-
-    const targetVec = p5.createVector(
-      (target.x0 + target.x1) *
-      (0.5 + p5.random(PARTICLE_TGT_VAR.min, PARTICLE_TGT_VAR.max)),
-      (target.y0 + target.y1) *
-      (0.5 + p5.random(PARTICLE_TGT_VAR.min, PARTICLE_TGT_VAR.max)),
-      0
-    );
-
-    this.spd = 
-      // (target - loc) points toward target from location
-      targetVec.sub(loc)
-      // normalize to unit vector
-      .normalize()
-      // scale by random speed
-      .mult(p5.random(PARTICLE_SPEED.min, PARTICLE_SPEED.max));
-
-    this.size = 4;
     this.id = Particle.particleCount++;
   }
 
   update() {
     this.loc.add(this.spd);
-    
-    this.rot.val += this.rot.spd;
-    
-    if (this.loc.z === 0 && checkForCollision(this)) {
-      // bounce opposite way
-      this.spd.setHeading(this.spd.heading() - Math.PI
-        + p5.random(
-            PARTICLE_BOUNCE_ANG_VAR.min,
-            PARTICLE_BOUNCE_ANG_VAR.max,
-          )
-      );
-      this.spd.mult([
-        p5.random(PARTICLE_BOUNCE_VAR.min, PARTICLE_BOUNCE_VAR.max),
-        p5.random(PARTICLE_BOUNCE_VAR.min, PARTICLE_BOUNCE_VAR.max),
-        0
-      ]);
-      this.spd.z = p5.random(PARTICLE_BOUNCE_SPEED.min, PARTICLE_BOUNCE_SPEED.max);
-    }
+    this.age++;
   }
 
   draw(g) {
@@ -85,19 +48,17 @@ class Particle {
 
 
 
-    
+
     g.push();
-    g.translate(this.loc.x, this.loc.y, this.loc.z);
+    g.translate(this.loc.x, this.loc.y);
     // point in direction of travel
     g.rotateZ(this.spd.heading());
-    // flip along direction of travel
-    g.rotateY(this.rot.val);
     
     g.rectMode(p5.RADIUS);
     g.fill(70);
     g.noStroke();
     
-    g.rect(0, 0, this.size, this.size);
+    g.rect(0, 0, this.size.w, this.size.h);
       
     g.pop();
   }
@@ -111,10 +72,10 @@ export function initFactory(_p5, bounds) {
 }
 
 /**
- * Spawn particle at location, moving toward target
+ * Spawn particle at location
  */
-export function spawnParticle(loc, target) {
-  particles.push(new Particle(loc, target));
+export function spawnParticle(loc, rot) {
+  particles.push(new Particle(loc, rot));
 }
 
 /**
@@ -126,23 +87,10 @@ export function updateParticles() {
     p.update();
 
     // remove old particles
-    if (p.loc.z > 500) particles.splice(i, 1);
+    if (p.age <= 0) particles.splice(i, 1);
   };
 }
 
 export function drawParticles(g) {
   particles.forEach(p => p.draw(g));
-}
-
-/**
- * TODO: target is tightly coupled with silhouette,
- * and assumes rectangular bounds
- */
-function checkForCollision(p)  {
-  return (
-    p.loc.x > p.target.x0 &&
-    p.loc.x < p.target.x1 &&
-    p.loc.y > p.target.y0 &&
-    p.loc.y < p.target.y1
-  );
 }
