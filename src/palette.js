@@ -21,20 +21,21 @@ export function initFactory(_p5) {
 /**
  * Create palette
  */
-export async function createPalette(paletteId) {
+export async function createPalette(paletteId, bounds) {
   return new Promise((resolve, reject) => {
     p5.loadImage(PALETTE_BASE_PATH + PALETTE_PATHS[paletteId], image => {
       image.loadPixels();
       sourceImages[paletteId] = image;
 
+      // public interface for palette instances
       const palette = {
         width: image.width,
         height: image.height,
         getColor: (u, v) => getColor(image, u, v),
-        getColorAtMouse: (bounds, x, y) => getColorAtMouse(image, bounds, x, y)
+        getColorAtMouse: (x, y) => getColorAtMouse(image, bounds, x, y)
       };
-      palettes[paletteId] = palette;
 
+      palettes[paletteId] = palette;
       resolve(palette);
       // TODO: handle error and reject()
     });

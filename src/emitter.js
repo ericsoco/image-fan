@@ -4,17 +4,21 @@ let emitters = [];
 
 class Emitter {
   loc;
+  palette;
   rot;
   rotSpd;
   count;
   next;
+  longevity;
 
-  constructor(loc) {
+  constructor(loc, palette) {
     this.loc = loc;
+    this.palette = palette;
     this.rot = 2 * Math.PI * Math.random();
     this.rotSpd = 0.05;
     this.count = 0;
     this.next = getSpawnTime();
+    this.longevity = 5 + 3 * Math.random();
   }
 
   update(spawnParticle) {
@@ -22,7 +26,12 @@ class Emitter {
       this.count = 0;
       this.next = getSpawnTime();
       this.rot += this.rotSpd;
-      return spawnParticle(this.loc, this.rot);
+      return spawnParticle({
+        loc: this.loc,
+        rot: this.rot,
+        longevity: this.longevity,
+        palette: this.palette
+     });
     }
   }
 
@@ -48,7 +57,7 @@ export function initFactory(_p5, bounds) {
  * Create emitter
  */
 export function spawnEmitter(loc, palette) {
-  emitters.push(new Emitter(loc));
+  emitters.push(new Emitter(loc, palette));
 }
 
 /**

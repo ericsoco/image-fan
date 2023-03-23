@@ -9,14 +9,14 @@ let particles = [];
 class Particle {
   static particleCount = 0;
 
-  age;
+  lifespan;
   loc;
   spd;
   size;
   id;
 
-  constructor(loc, rot) {
-    this.age = p5.random(PARTICLE_LIFESPAN.min, PARTICLE_LIFESPAN.max)
+  constructor({loc, rot, longevity, palette}) {
+    this.lifespan = p5.random(PARTICLE_LIFESPAN.min, PARTICLE_LIFESPAN.max) * longevity;
     this.loc = loc.copy();
     this.spd = p5.createVector(0, p5.random(PARTICLE_SPEED.min, PARTICLE_SPEED.max))
       .rotate(rot);
@@ -25,11 +25,13 @@ class Particle {
       h: p5.random(PARTICLE_HEIGHT.min, PARTICLE_HEIGHT.max)
     };
     this.id = Particle.particleCount++;
+
+    this.palette = createPalette(this.loc, palette, this.lifespan);
   }
 
   update() {
     this.loc.add(this.spd);
-    this.age++;
+    this.lifespan--;
   }
 
   draw(g) {
@@ -47,7 +49,7 @@ class Particle {
     //
 
 
-
+    const color = this.palette[Math.floor(this.lifespan)] || this.palette[0];
 
     g.push();
     g.translate(this.loc.x, this.loc.y);
@@ -55,7 +57,7 @@ class Particle {
     g.rotateZ(this.spd.heading());
     
     g.rectMode(p5.RADIUS);
-    g.fill(70);
+    g.fill(color);
     g.noStroke();
     
     g.rect(0, 0, this.size.w, this.size.h);
@@ -74,8 +76,8 @@ export function initFactory(_p5, bounds) {
 /**
  * Spawn particle at location
  */
-export function spawnParticle(loc, rot) {
-  particles.push(new Particle(loc, rot));
+export function spawnParticle(params) {
+  particles.push(new Particle(params));
 }
 
 /**
@@ -87,10 +89,48 @@ export function updateParticles() {
     p.update();
 
     // remove old particles
-    if (p.age <= 0) particles.splice(i, 1);
+    if (p.lifespan <= 0) particles.splice(i, 1);
   };
 }
 
 export function drawParticles(g) {
   particles.forEach(p => p.draw(g));
+}
+
+/**
+ * Map a palette object to a list of colors to be used
+ * over the lifespan of the particle.
+ */
+function createPalette(loc, palette, lifespan) {
+  // pull colors from a single column of pixels at the mouse X location
+  // (scaled to the width of the palette source image).
+  // the entire column is always used, so only particles with the
+  // maximum lifespan will use the entire column of pixel colors.
+
+  //
+  // TODO: the longevity scalar makes everything more complicated...
+  // do we want to map to a maximum length of PARTICLE_LIFESPAN.max * max longevity?
+  // do we want to make every strip use the entire palette?
+  // do we want to stop the palette somewhere else?
+  // need to experiment; passed lifespan in here for this.
+  //
+
+  //
+  // also TODO: the palette isn't filling up correctly,
+  // there are a bunch of undefined entries.
+  // seems my math is off...
+  //
+
+  //
+  // and finally also TODO: want to smooth out color curve so the changes
+  // from step to step are not as abrupt.
+  // essentially want to lerp from step to step.
+  //
+  const maxLifespan = Math.floor(lifespan);
+  const particlePalette = [];
+  for (let v=maxLifespan-1; v>=0; v--) {
+    const paletteY = Math.floor(v * palette.height / maxLifespan);
+    particlePalette.push(palette.getColorAtMouse(loc.x, paletteY))
+  }
+  return particlePalette;
 }

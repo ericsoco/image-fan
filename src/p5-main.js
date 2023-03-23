@@ -23,8 +23,8 @@ import {
 //
 // consts
 //
-const BW = 1200;
-const BH = 675;
+const BW = 1600;
+const BH = 900;
 const BOUNDS = {
   w: BW,
   h: BH,
@@ -45,7 +45,7 @@ export default function (p5) {
   initParticleFactory(p5, BOUNDS);
   initEmitterFactory(p5, BOUNDS);
 
-  createPalette(PALETTE_IDS.BASALT_CANYON).then(loadedPalette => {
+  createPalette(PALETTE_IDS.BASALT_CANYON, BOUNDS).then(loadedPalette => {
     palette = loadedPalette
   });
 
@@ -102,7 +102,7 @@ export default function (p5) {
    * Attach p5 mouseClicked() method to p5 instance
    */
   p5.mouseClicked = () => {
-    spawnEmitter(getMouseLoc(p5));
+    spawnEmitter(getMouseLoc(p5), palette);
   }
 
   /*
@@ -122,14 +122,14 @@ export default function (p5) {
   function getMouseLoc(p5) {
     return p5.createVector(p5.mouseX, p5.mouseY, 0);
   }
-  
+
   function updateObjects() {
     updateEmitters(spawnParticle);
     updateParticles();
   }
 
   function testPalette() {
-    const color = palette.getColorAtMouse(BOUNDS, p5.mouseX, p5.mouseY);
+    const color = palette.getColorAtMouse(p5.mouseX, p5.mouseY);
     g3.rectMode(p5.CENTER);
     g3.noStroke();
     g3.fill(color);
