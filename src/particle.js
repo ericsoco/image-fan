@@ -6,6 +6,9 @@ const PARTICLE_HEIGHT = {min: 6, max: 16};
 let p5 = null;
 let particles = [];
 
+/**
+ * Ribbon-shaped train of individual marks
+ */
 class Particle {
   static particleCount = 0;
 
@@ -15,7 +18,7 @@ class Particle {
   size;
   id;
 
-  constructor({loc, rot, longevity, palette}) {
+  constructor({loc, rot, longevity, palette, bounds}) {
     this.lifespan = p5.random(PARTICLE_LIFESPAN.min, PARTICLE_LIFESPAN.max) * longevity;
     this.loc = loc.copy();
     this.spd = p5.createVector(0, p5.random(PARTICLE_SPEED.min, PARTICLE_SPEED.max))
@@ -26,7 +29,7 @@ class Particle {
     };
     this.id = Particle.particleCount++;
 
-    this.palette = createPalette(this.loc, palette, this.lifespan);
+    this.palette = createPalette(palette, this.loc, this.lifespan);
   }
 
   update() {
@@ -35,20 +38,6 @@ class Particle {
   }
 
   draw(g) {
-    //
-    // TODO NEXT: make fans of images similar to
-    // https://www.thisiscolossal.com/2023/03/lyndi-sales-paper-sculptures/
-    // by stepping through a palette of images like
-    // https://www.northlandscapes.com/portfolio/iceland-basalt
-    // create palette by taking 1px wide slice thru image and
-    // step through each pixel color from top to bottom
-    // could use algo as video mirror as well,
-    // by isolating palette of each person and drawing fans of color
-    // wherever they stand, with closeness to camera 
-    // determining length of fan rays
-    //
-
-
     const color = this.palette[Math.floor(this.lifespan)] || this.palette[0];
 
     g.push();
@@ -69,7 +58,7 @@ class Particle {
 /**
  * Init before creating instances
  */
-export function initFactory(_p5, bounds) {
+export function initFactory(_p5) {
   p5 = _p5;
 }
 
@@ -101,7 +90,7 @@ export function drawParticles(g) {
  * Map a palette object to a list of colors to be used
  * over the lifespan of the particle.
  */
-function createPalette(loc, palette, lifespan) {
+function createPalette(palette, loc, lifespan) {
   // pull colors from a single column of pixels at the mouse X location
   // (scaled to the width of the palette source image).
   // the entire column is always used, so only particles with the
@@ -116,21 +105,18 @@ function createPalette(loc, palette, lifespan) {
   //
 
   //
-  // also TODO: the palette isn't filling up correctly,
-  // there are a bunch of undefined entries.
-  // seems my math is off...
-  //
-
-  //
   // and finally also TODO: want to smooth out color curve so the changes
   // from step to step are not as abrupt.
   // essentially want to lerp from step to step.
   //
-  const maxLifespan = Math.floor(lifespan);
+  const maxLifespan = PARTICLE_LIFESPAN.max;
   const particlePalette = [];
   for (let v=maxLifespan-1; v>=0; v--) {
-    const paletteY = Math.floor(v * palette.height / maxLifespan);
-    particlePalette.push(palette.getColorAtMouse(loc.x, paletteY))
+    const paletteV = Math.floor(v / maxLifespan * palette.height);
+    particlePalette.push(palette.getScaledColor({
+      x: loc.x,
+      v: paletteV
+    }));
   }
   return particlePalette;
 }

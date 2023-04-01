@@ -18,7 +18,8 @@ class Emitter {
     this.rotSpd = 0.05;
     this.count = 0;
     this.next = getSpawnTime();
-    this.longevity = 5 + 3 * Math.random();
+    // this.longevity = 5 + 3 * Math.random();
+    this.longevity = 1;
   }
 
   update(spawnParticle) {
@@ -48,7 +49,7 @@ class Emitter {
 /**
  * Init before creating instances
  */
-export function initFactory(_p5, bounds) {
+export function initFactory(_p5) {
   p5 = _p5;
 }
 

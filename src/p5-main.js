@@ -23,8 +23,8 @@ import {
 //
 // consts
 //
-const BW = 1600;
-const BH = 900;
+const BW = 1200;
+const BH = 675;
 const BOUNDS = {
   w: BW,
   h: BH,
@@ -45,7 +45,7 @@ export default function (p5) {
   initParticleFactory(p5, BOUNDS);
   initEmitterFactory(p5, BOUNDS);
 
-  createPalette(PALETTE_IDS.BASALT_CANYON, BOUNDS).then(loadedPalette => {
+  createPalette(null, BOUNDS).then(loadedPalette => {
     palette = loadedPalette
   });
 
