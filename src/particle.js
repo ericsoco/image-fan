@@ -104,19 +104,28 @@ function createPalette(palette, loc, lifespan) {
   // need to experiment; passed lifespan in here for this.
   //
 
-  //
-  // and finally also TODO: want to smooth out color curve so the changes
-  // from step to step are not as abrupt.
-  // essentially want to lerp from step to step.
-  //
   const maxLifespan = PARTICLE_LIFESPAN.max;
   const particlePalette = [];
-  for (let v=maxLifespan-1; v>=0; v--) {
+  for (let v=lifespan-1; v>=0; v--) {
     const paletteV = Math.floor(v / maxLifespan * palette.height);
-    particlePalette.push(palette.getScaledColor({
+    const paletteColor = p5.color(palette.getScaledColor({
       x: loc.x,
       v: paletteV
     }));
+
+    const lerpDepth = Math.min(particlePalette.length, 4);
+    const lerpedColor = lerpPaletteColors(particlePalette, paletteColor, lerpDepth);
+
+    particlePalette.push(lerpedColor);
   }
   return particlePalette;
+}
+
+function lerpPaletteColors(particlePalette, paletteColor, lerpDepth) {
+  const len = particlePalette.length;
+  let lerpedColor = paletteColor;
+  for (let i=1; i<=lerpDepth; i++) {
+    lerpedColor = p5.lerpColor(lerpedColor, particlePalette[len - i], 0.5);
+  }
+  return lerpedColor;
 }

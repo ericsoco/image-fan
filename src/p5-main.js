@@ -30,6 +30,7 @@ const BOUNDS = {
   h: BH,
   diag: Math.sqrt(BW*BW, BH*BH)
 };
+const CLEAR_DELAY = 3;
 
 
 export default function (p5) {
@@ -40,6 +41,7 @@ export default function (p5) {
   let g3;  // 3D buffer
   let debug = false;
   let palette;
+  let clearTimer = CLEAR_DELAY;
 
   initPaletteFactory(p5);
   initParticleFactory(p5, BOUNDS);
@@ -139,19 +141,22 @@ export default function (p5) {
   function render() {
     p5.background(180, 170, 160);
     
-    // particle trails
-    g3.noStroke();
-    g3.fill(230, 0.01);
-    g3.rect(0, 0, BOUNDS.w, BOUNDS.h);
-    // Depth buffer is supposed to be cleared on every update()
-    // https://github.com/processing/p5.js/blob/main/src/webgl/p5.RendererGL.js#L583
-    // ...but perhaps update() is not called on renderer that is not
-    // the main context (createGraphics vs createCanvas(GL)).
-    // clear() only clears color buffer
-    // https://github.com/processing/p5.js/blob/main/src/webgl/p5.RendererGL.js#L595
-    // ...so manually clear only the depth buffer.
-    g3._renderer.GL.clear(g3._renderer.GL.DEPTH_BUFFER_BIT);
-    g2.clear();
+    if (clearTimer-- <= 0) {
+      clearTimer = CLEAR_DELAY;
+      // particle trails
+      g3.noStroke();
+      g3.fill(250, 240, 220, 0.01);
+      g3.rect(0, 0, BOUNDS.w, BOUNDS.h);
+      // Depth buffer is supposed to be cleared on every update()
+      // https://github.com/processing/p5.js/blob/main/src/webgl/p5.RendererGL.js#L583
+      // ...but perhaps update() is not called on renderer that is not
+      // the main context (createGraphics vs createCanvas(GL)).
+      // clear() only clears color buffer
+      // https://github.com/processing/p5.js/blob/main/src/webgl/p5.RendererGL.js#L595
+      // ...so manually clear only the depth buffer.
+      g3._renderer.GL.clear(g3._renderer.GL.DEPTH_BUFFER_BIT);
+      g2.clear();
+    }
 
     // testPalette();
     
