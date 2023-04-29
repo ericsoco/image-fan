@@ -13,7 +13,12 @@ determining length of fan rays
 
 
 (X) smooth particle palette colors (lerpColor)
-( ) restore longevity scalar in emitter and
+(X) restore longevity scalar in emitter and
     implement palette prefill in a way that is compatible
 ( ) don't do background fade, or at least not as quickly;
     instead, set alpha of each particle mark to blend(?)
+( ) vary longevity per particle instead of per emitter,
+    based on distance to nearest emitter (fill space between emitters)
+( ) mix two/three palettes in a single composition
+( ) try adding dropshadows / lighting?
+( ) choose background color based on selected palette

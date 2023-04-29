@@ -13,13 +13,22 @@ class Particle {
   static particleCount = 0;
 
   lifespan;
+  longevity;
   loc;
   spd;
   size;
   id;
 
-  constructor({loc, rot, longevity, palette, bounds}) {
-    this.lifespan = p5.random(PARTICLE_LIFESPAN.min, PARTICLE_LIFESPAN.max) * longevity;
+  /**
+   * @param {p5.Vector} loc - Particle location
+   * @param {number} rot - Particle rotation
+   * @param {number} longevity - Scalar applied to length of mark train
+   * @param {Palette} palette - Palette object used to define colors in mark train
+   */
+  constructor({loc, rot, longevity, palette}) {
+    const relativeLifespan = p5.random(PARTICLE_LIFESPAN.min, PARTICLE_LIFESPAN.max);
+    this.lifespan = relativeLifespan * longevity;
+    this.longevity = longevity;
     this.loc = loc.copy();
     this.spd = p5.createVector(0, p5.random(PARTICLE_SPEED.min, PARTICLE_SPEED.max))
       .rotate(rot);
@@ -29,7 +38,7 @@ class Particle {
     };
     this.id = Particle.particleCount++;
 
-    this.palette = createPalette(palette, this.loc, this.lifespan);
+    this.palette = createPalette(palette, this.loc, relativeLifespan);
   }
 
   update() {
@@ -38,7 +47,9 @@ class Particle {
   }
 
   draw(g) {
-    const color = this.palette[Math.floor(this.lifespan)] || this.palette[0];
+    // palette prefill uses lifespan without longevity so scale accordingly
+    const paletteIndex = Math.floor(this.lifespan / this.longevity);
+    const color = this.palette[paletteIndex] || this.palette[0];
 
     g.push();
     g.translate(this.loc.x, this.loc.y);
@@ -104,10 +115,9 @@ function createPalette(palette, loc, lifespan) {
   // need to experiment; passed lifespan in here for this.
   //
 
-  const maxLifespan = PARTICLE_LIFESPAN.max;
   const particlePalette = [];
   for (let v=lifespan-1; v>=0; v--) {
-    const paletteV = Math.floor(v / maxLifespan * palette.height);
+    const paletteV = Math.floor(v / PARTICLE_LIFESPAN.max * palette.height);
     const paletteColor = p5.color(palette.getScaledColor({
       x: loc.x,
       v: paletteV

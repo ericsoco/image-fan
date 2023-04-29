@@ -32,6 +32,8 @@ export function initFactory(_p5) {
 
 /**
  * Create palette
+ * @param {string} id - Palette ID (from PALETTE_IDS)
+ * @param {w: number, h: number} bounds - Sketch bounds
  */
 export async function createPalette(id, bounds) {
   const paletteId = id || getRandomPaletteId();
@@ -52,7 +54,6 @@ export async function createPalette(id, bounds) {
 
       palettes[paletteId] = palette;
       resolve(palette);
-      // TODO: handle error and reject()
     });
   });
 }

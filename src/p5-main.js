@@ -23,8 +23,10 @@ import {
 //
 // consts
 //
-const BW = 1200;
-const BH = 675;
+// const BW = 1200;
+// const BH = 675;
+const BW = 1600;
+const BH = 900;
 const BOUNDS = {
   w: BW,
   h: BH,

@@ -11,6 +11,10 @@ class Emitter {
   next;
   longevity;
 
+  /**
+   * @param {p5.Vector} loc - Particle location
+   * @param {Palette} palette - Palette object used to define colors in mark train
+   */
   constructor(loc, palette) {
     this.loc = loc;
     this.palette = palette;
@@ -18,8 +22,11 @@ class Emitter {
     this.rotSpd = 0.05;
     this.count = 0;
     this.next = getSpawnTime();
-    // this.longevity = 5 + 3 * Math.random();
-    this.longevity = 1;
+
+    // TODO: vary this per particle, based on distance to nearest emitter
+    // instead of per emitter
+    this.longevity = 3 + 1.5 * Math.random();
+    // this.longevity = 1;
   }
 
   update(spawnParticle) {
